@@ -2,8 +2,7 @@
 
 A car-rental backend: user registration with email OTP verification, JWT auth,
 car listings with image upload and availability windows, and date-range
-bookings with overlap protection. This is a production-grade Spring Boot port of
-the original Node.js/Express service (`car_hub_backend`).
+bookings with overlap protection.
 
 - **Java 21 (LTS)** · **Spring Boot 3.5.x** · **Maven**
 - **MongoDB** (Spring Data MongoDB) · **Redis** (rate limiting, token
