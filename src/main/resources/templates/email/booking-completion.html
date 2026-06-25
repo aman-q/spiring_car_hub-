@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Rental complete</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;">
+    <tr>
+        <td align="center" style="padding:40px 16px;">
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+                   style="max-width:600px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.08);">
+                <tr>
+                    <td style="background:#0F172A;padding:18px 40px;">
+                        <span style="font-size:18px;font-weight:700;color:#FFFFFF;letter-spacing:-0.5px;">CarHub</span>
+                        <span style="font-size:12px;color:#64748B;margin-left:10px;">Premium Car Rentals</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#7C3AED;padding:48px 40px 40px;">
+                        <h1 style="margin:0 0 8px;font-size:28px;font-weight:700;color:#FFFFFF;">Rental Complete!</h1>
+                        <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.85);">
+                            Thanks for choosing CarHub, <span th:text="${booking.recipientName}">there</span></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:40px 40px 36px;">
+                        <p style="margin:0 0 28px;font-size:16px;color:#475569;line-height:1.65;">
+                            Your rental of the <strong style="color:#0F172A;" th:text="${booking.carTitle}">car</strong>
+                            is now complete. We hope you enjoyed the ride. Here's a summary of your trip.
+                        </p>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                               style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
+                            <tr>
+                                <td style="background:#F8FAFC;padding:12px 20px;border-bottom:1px solid #E2E8F0;">
+                                    <span style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:1.2px;">Receipt</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 20px;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Vehicle</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;font-weight:600;color:#0F172A;">
+                                                <span th:text="${booking.carTitle}">Car</span> —
+                                                <span th:text="${booking.carCompany}">Maker</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Duration</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;font-weight:600;color:#0F172A;"
+                                                th:text="${booking.days} + ' day(s)'">— days</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Status</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;font-weight:700;color:#5B21B6;text-transform:uppercase;"
+                                                th:text="${booking.status}">COMPLETED</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;font-size:13px;color:#94A3B8;">Total Charged</td>
+                                            <td align="right" style="padding:12px 0;font-size:18px;font-weight:700;color:#059669;"
+                                                th:text="'$' + ${booking.totalPrice}">$0</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="background:#F0FDF4;border-left:3px solid #22C55E;border-radius:6px;padding:14px 16px;margin-top:24px;">
+                            <p style="margin:0;font-size:13px;color:#15803D;line-height:1.65;">
+                                <strong>Enjoyed your ride?</strong> We'd love to hear about your experience. Your feedback
+                                helps us serve you better on your next trip.</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#F8FAFC;padding:28px 40px;border-top:1px solid #E2E8F0;">
+                        <p style="margin:0;font-size:12px;color:#CBD5E1;">© CarHub. All rights reserved.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

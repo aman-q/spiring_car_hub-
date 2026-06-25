@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: carhub
+  data:
+    mongodb:
+      uri: ${DB_URL:mongodb://localhost:27017/carhub}
+      # Used only when the URI has no database in its path (e.g. an Atlas
+      # SRV string ending in "/"). Mongoose defaulted this to "test"; Spring
+      # requires it to be explicit.
+      database: ${MONGODB_DATABASE:carhub}
+      # Left off (Spring's default): indexes declared via @Indexed document
+      # intent are managed deliberately, not auto-built on every boot. Building
+      # them on startup is unsafe against existing data — e.g. legacy users with
+      # a null phonenumber would break a unique index.
+      auto-index-creation: false
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+  mail:
+    host: ${EMAIL_HOST:smtp.gmail.com}
+    port: ${EMAIL_PORT:587}
+    username: ${EMAIL_USER:}
+    password: ${EMAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 60MB
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+server:
+  port: ${PORT:5001}
+
+carhub:
+  jwt:
+    # MUST be overridden in production. >= 32 bytes for HS256.
+    secret: ${JWT_SECRET:dev-only-insecure-secret-change-me-0123456789abcdefghijklmnop}
+    access-token-ttl: 15m
+    refresh-token-ttl: 7d
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+    api-key: ${CLOUDINARY_API_KEY:}
+    api-secret: ${CLOUDINARY_API_SECRET:}
+    folder: collection/images
+  email:
+    provider: ${EMAIL_PROVIDER:brevo}   # brevo | smtp
+    sender-name: ${EMAIL_SENDER_NAME:CarHub}
+    sender-email: ${EMAIL_SENDER_ADDRESS:no-reply@carhub.com}
+  brevo:
+    api-key: ${BREVO_API_KEY:}
+    base-url: https://api.brevo.com/v3
+  rate-limit:
+    enabled: true
+    global:
+      key-prefix: "gl:"
+      limit: 100
+      window-seconds: 3600
+    policies:
+      login:
+        key-prefix: "login:"
+        limit: 5
+        window-seconds: 300
+      register:
+        key-prefix: "reg:"
+        limit: 5
+        window-seconds: 600
+      otp:
+        key-prefix: "otp:"
+        limit: 3
+        window-seconds: 300
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

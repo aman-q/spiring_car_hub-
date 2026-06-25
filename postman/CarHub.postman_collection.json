@@ -1,0 +1,515 @@
+{
+  "info": {
+    "_postman_id": "11978aa5-9170-432c-a7e9-7b19a67a4e6f",
+    "name": "CarHub (Spring Boot)",
+    "description": "End-to-end collection for the CarHub Spring Boot API.\n\n## Quick start\n1. Start the app (`./mvnw spring-boot:run`) — defaults to `{{baseUrl}}` = http://localhost:5001.\n2. **User & Auth → Register**, then **Verify OTP** (read the 6-digit OTP from the email, set the `otp` variable).\n3. **Login** — its test script auto-saves `accessToken`, `refreshToken`, and `userId` into collection variables. Every protected request then sends `Authorization: Bearer {{accessToken}}` automatically.\n4. When the 15-minute access token expires you'll get 401 — run **Refresh Token**; its script swaps in the rotated `accessToken` + `refreshToken`. **Logout** blacklists the access token and clears both.\n\nIDs (`carId`, `bookingId`) are captured automatically by Add Car / Create Booking test scripts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5001", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "carId", "value": "", "type": "string" },
+    { "key": "bookingId", "value": "", "type": "string" },
+    { "key": "testEmail", "value": "jane.doe@example.com", "type": "string" },
+    { "key": "testPassword", "value": "secret123", "type": "string" },
+    { "key": "testPhone", "value": "9876500001", "type": "string" },
+    { "key": "otp", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "User & Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) { pm.collectionVariables.set('userId', res.data.id); }",
+                  "pm.test('registered (201)', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"Jane\",\n  \"lname\": \"Doe\",\n  \"phonenumber\": {{testPhone}},\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/register",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "register" ]
+            },
+            "description": "Creates a user and emails a 6-digit OTP (10-min expiry). Rate limited: 5 / 10 min."
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"otp\": {{otp}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/verify-otp",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "verify-otp" ]
+            },
+            "description": "Set the `otp` collection variable to the code from the email, then send. Marks the account email-verified."
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/resend-otp",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "resend-otp" ]
+            },
+            "description": "Re-sends a fresh OTP. Rate limited: 3 / 5 min."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken || '');",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken || '');",
+                  "  if (res.data.user) { pm.collectionVariables.set('userId', res.data.user.id); }",
+                  "}",
+                  "pm.test('login ok (200)', () => pm.response.to.have.status(200));",
+                  "pm.test('access token returned', () => pm.expect(res.data.accessToken).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "login" ]
+            },
+            "description": "Returns a 15-min access token + a 7-day rotating refresh token. The test script saves both. Rate limited: 5 / 5 min."
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken || '');",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken || '');",
+                  "}",
+                  "pm.test('refreshed (200)', () => pm.response.to.have.status(200));",
+                  "pm.test('new access token', () => pm.expect(res.data.accessToken).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/refresh-token",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "refresh-token" ]
+            },
+            "description": "Exchange a valid refresh token for a NEW access token + a NEW refresh token (both rotated). Use this when the access token has expired (401)."
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('accessToken', '');",
+                  "pm.collectionVariables.set('refreshToken', '');",
+                  "pm.test('logged out (200)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/logout",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "logout" ]
+            },
+            "description": "Blacklists the current access token (by jti, in Redis) and clears the stored refresh token. Sends Bearer {{accessToken}}."
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/forgot-password",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "forgot-password" ]
+            },
+            "description": "Emails a password-reset OTP. Rate limited: 3 / 5 min."
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"otp\": {{otp}},\n  \"newPassword\": \"newSecret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/reset-password",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "reset-password" ]
+            },
+            "description": "Resets the password using the OTP and revokes the existing refresh token."
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/profile/me",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "profile", "me" ]
+            },
+            "description": "Current user's profile. Requires Bearer token."
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"Jane\",\n  \"lname\": \"Smith\",\n  \"phonenumber\": {{testPhone}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/profile/me",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "profile", "me" ]
+            },
+            "description": "All fields optional; at least one required."
+          }
+        },
+        {
+          "name": "Get My Profile Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/profile/me/bookings",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "user", "profile", "me", "bookings" ]
+            },
+            "description": "Upcoming + past bookings for the current user."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cars",
+      "item": [
+        {
+          "name": "Get All Cars",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cars?page=1&limit=10",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cars" ],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "startDate", "value": "2026-07-01", "disabled": true },
+                { "key": "endDate", "value": "2026-07-05", "disabled": true }
+              ]
+            },
+            "description": "Public paged listing. Enable startDate/endDate to filter by availability window."
+          }
+        },
+        {
+          "name": "Get Car Detail",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cars/{{carId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cars", "{{carId}}" ]
+            },
+            "description": "Public. Includes availability info."
+          }
+        },
+        {
+          "name": "Add Car",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) { pm.collectionVariables.set('carId', res.data.id); }",
+                  "pm.test('car created (201)', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Tesla Model 3", "type": "text" },
+                { "key": "description", "value": "Long-range RWD, autopilot, 2023.", "type": "text" },
+                { "key": "yearOfManufacture", "value": "2023", "type": "text" },
+                { "key": "company", "value": "Tesla", "type": "text" },
+                { "key": "driveType", "value": "RWD", "type": "text" },
+                { "key": "price", "value": "45000", "type": "text" },
+                { "key": "images", "type": "file", "src": [] },
+                { "key": "images", "type": "file", "src": [] },
+                { "key": "images", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cars",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cars" ]
+            },
+            "description": "Multipart. Attach 3–10 image files to the `images` rows. driveType = LWD | RWD. Requires Bearer token. Do NOT set Content-Type manually — Postman adds the multipart boundary."
+          }
+        },
+        {
+          "name": "Update Car",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Tesla Model 3 Performance", "type": "text" },
+                { "key": "price", "value": "52000", "type": "text" },
+                { "key": "images", "type": "file", "src": [], "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cars/{{carId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cars", "{{carId}}" ]
+            },
+            "description": "Owner only. All fields optional; images optional."
+          }
+        },
+        {
+          "name": "Delete Car",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cars/{{carId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cars", "{{carId}}" ]
+            },
+            "description": "Owner only."
+          }
+        },
+        {
+          "name": "Get My Cars",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cars/usercars",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cars", "usercars" ]
+            },
+            "description": "Cars added by the current user."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) { pm.collectionVariables.set('bookingId', res.data.id); }",
+                  "pm.test('booking created (201)', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"carId\": \"{{carId}}\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-05\",\n  \"pickupLocation\": \"Airport T1\",\n  \"dropoffLocation\": \"Downtown\",\n  \"extras\": { \"gps\": true, \"babySeat\": false }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/booking/new-booking",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "booking", "new-booking" ]
+            },
+            "description": "Date-overlap protected (Redis lock). extras: gps (+10/day), babySeat (+5/day)."
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/booking/my-bookings?status=PENDING",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "booking", "my-bookings" ],
+              "query": [
+                { "key": "status", "value": "PENDING", "description": "Optional: PENDING | CONFIRMED | CANCELLED | COMPLETED" }
+              ]
+            },
+            "description": "Current user's bookings, optionally filtered by status."
+          }
+        },
+        {
+          "name": "Get Booking By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/booking/{{bookingId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "booking", "{{bookingId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Confirm Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/booking/{{bookingId}}/confirm",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "booking", "{{bookingId}}", "confirm" ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/booking/{{bookingId}}/cancel",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "booking", "{{bookingId}}", "cancel" ]
+            }
+          }
+        },
+        {
+          "name": "Complete Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/booking/{{bookingId}}/complete",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "booking", "{{bookingId}}", "complete" ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

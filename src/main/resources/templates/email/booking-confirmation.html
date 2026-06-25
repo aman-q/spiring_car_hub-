@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Booking confirmed</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;">
+    <tr>
+        <td align="center" style="padding:40px 16px;">
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+                   style="max-width:600px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.08);">
+                <tr>
+                    <td style="background:#0F172A;padding:18px 40px;">
+                        <span style="font-size:18px;font-weight:700;color:#FFFFFF;letter-spacing:-0.5px;">CarHub</span>
+                        <span style="font-size:12px;color:#64748B;margin-left:10px;">Premium Car Rentals</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#059669;padding:48px 40px 40px;">
+                        <h1 style="margin:0 0 8px;font-size:28px;font-weight:700;color:#FFFFFF;">Booking Confirmed!</h1>
+                        <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.85);">Your rental is all set — see you on the road</p>
+                        <div style="display:inline-block;margin-top:16px;padding:5px 14px;border-radius:20px;background:rgba(255,255,255,0.2);font-size:12px;font-weight:600;color:#FFFFFF;letter-spacing:1px;"
+                             th:text="${booking.bookingRef}">#REF</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:40px 40px 36px;">
+                        <p style="margin:0 0 28px;font-size:16px;color:#475569;line-height:1.65;">
+                            Hi <strong style="color:#0F172A;" th:text="${booking.recipientName}">there</strong> — your
+                            booking for the <strong style="color:#0F172A;" th:text="${booking.carTitle}">car</strong> is
+                            confirmed. Here's everything you need for your trip.
+                        </p>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                               style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:24px;">
+                            <tr>
+                                <td width="50%" valign="top" style="padding:20px 24px;border-right:1px dashed #CBD5E1;">
+                                    <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:1.5px;">Pick-Up</p>
+                                    <p style="margin:0 0 8px;font-size:20px;font-weight:700;color:#0F172A;" th:text="${booking.startDate}">—</p>
+                                    <p style="margin:0;font-size:13px;font-weight:500;color:#475569;" th:text="${booking.pickupLocation}">—</p>
+                                </td>
+                                <td width="50%" valign="top" style="padding:20px 24px;">
+                                    <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:1.5px;">Return</p>
+                                    <p style="margin:0 0 8px;font-size:20px;font-weight:700;color:#0F172A;" th:text="${booking.endDate}">—</p>
+                                    <p style="margin:0;font-size:13px;font-weight:500;color:#475569;" th:text="${booking.dropoffLocation}">—</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center" style="background:#F8FAFC;border-top:1px solid #E2E8F0;padding:10px 20px;">
+                                    <span style="font-size:12px;font-weight:600;color:#64748B;"
+                                          th:text="${booking.days} + ' day(s) rental'">— rental</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                               style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+                            <tr>
+                                <td style="background:#F8FAFC;padding:12px 20px;border-bottom:1px solid #E2E8F0;">
+                                    <span style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:1.2px;">Booking Details</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 20px;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Vehicle</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;font-weight:600;color:#0F172A;">
+                                                <span th:text="${booking.carTitle}">Car</span> —
+                                                <span th:text="${booking.carCompany}">Maker</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Status</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;font-weight:700;color:#15803D;text-transform:uppercase;"
+                                                th:text="${booking.status}">CONFIRMED</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;font-size:13px;color:#94A3B8;">Total Paid</td>
+                                            <td align="right" style="padding:12px 0;font-size:18px;font-weight:700;color:#059669;"
+                                                th:text="'$' + ${booking.totalPrice}">$0</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#F8FAFC;padding:28px 40px;border-top:1px solid #E2E8F0;">
+                        <p style="margin:0;font-size:12px;color:#CBD5E1;">© CarHub. All rights reserved.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

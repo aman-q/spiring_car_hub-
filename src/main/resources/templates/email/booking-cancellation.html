@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Booking cancelled</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;">
+    <tr>
+        <td align="center" style="padding:40px 16px;">
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+                   style="max-width:600px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.08);">
+                <tr>
+                    <td style="background:#0F172A;padding:18px 40px;">
+                        <span style="font-size:18px;font-weight:700;color:#FFFFFF;letter-spacing:-0.5px;">CarHub</span>
+                        <span style="font-size:12px;color:#64748B;margin-left:10px;">Premium Car Rentals</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#DC2626;padding:48px 40px 40px;">
+                        <h1 style="margin:0 0 8px;font-size:28px;font-weight:700;color:#FFFFFF;">Booking Cancelled</h1>
+                        <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.85);">Your reservation has been removed</p>
+                        <div style="display:inline-block;margin-top:16px;padding:5px 14px;border-radius:20px;background:rgba(255,255,255,0.2);font-size:12px;font-weight:600;color:#FFFFFF;letter-spacing:1px;"
+                             th:text="${booking.bookingRef}">#REF</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:40px 40px 36px;">
+                        <p style="margin:0 0 28px;font-size:16px;color:#475569;line-height:1.65;">
+                            Hi <strong style="color:#0F172A;" th:text="${booking.recipientName}">there</strong> — your
+                            booking for the <strong style="color:#0F172A;" th:text="${booking.carTitle}">car</strong> has
+                            been cancelled. No further action is needed on your part.
+                        </p>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                               style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
+                            <tr>
+                                <td style="background:#F8FAFC;padding:12px 20px;border-bottom:1px solid #E2E8F0;">
+                                    <span style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:1.2px;">Cancelled Reservation</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 20px;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Vehicle</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;font-weight:600;color:#0F172A;">
+                                                <span th:text="${booking.carTitle}">Car</span> —
+                                                <span th:text="${booking.carCompany}">Maker</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;color:#94A3B8;">Was Scheduled</td>
+                                            <td align="right" style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:13px;font-weight:600;color:#0F172A;">
+                                                <span th:text="${booking.startDate}">—</span> &rarr;
+                                                <span th:text="${booking.endDate}">—</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:12px 0;font-size:13px;color:#94A3B8;">Status</td>
+                                            <td align="right" style="padding:12px 0;font-size:13px;font-weight:700;color:#991B1B;text-transform:uppercase;"
+                                                th:text="${booking.status}">CANCELLED</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="background:#EFF6FF;border-left:3px solid #3B82F6;border-radius:6px;padding:14px 16px;margin-top:24px;">
+                            <p style="margin:0;font-size:13px;color:#1E40AF;line-height:1.65;">
+                                <strong>Looking for another car?</strong> Browse our full fleet and find something that
+                                works for your schedule. We'd love to have you back on the road.</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#F8FAFC;padding:28px 40px;border-top:1px solid #E2E8F0;">
+                        <p style="margin:0;font-size:12px;color:#CBD5E1;">© CarHub. All rights reserved.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
