@@ -2,7 +2,7 @@
 
 This document explains how the codebase is organised and **why**. It is the
 counterpart to the README's "how to run it." The guiding goal is the same one
-the original Node service followed: strict separation of concerns, no magic
+the original service followed: strict separation of concerns, no magic
 strings, and no hardcoded HTTP status codes or user-facing messages — but
 expressed idiomatically for Spring Boot.
 
@@ -42,7 +42,7 @@ hopping across `controllers/`, `services/`, `models/` trees. `common/` and
 
 ## 2. Layered responsibilities within a feature
 
-The same discipline as the Node app (`controller → service → model`), enforced
+The same discipline as the   app (`controller → service → model`), enforced
 by Spring stereotypes:
 
 | Layer | Type | Responsibility |
@@ -61,7 +61,7 @@ services — DTOs are the boundary in both directions.
 
 ## 3. Single source of truth: no hardcoded codes or messages
 
-This was an explicit requirement carried over from the Node project
+This was an explicit requirement carried over from the   project
 (`statusCodes.js`, `messages.js`). Two collaborating pieces enforce it:
 
 ### `ErrorCode` (status + message key)
@@ -146,7 +146,7 @@ exceptions become responses, so no controller carries error-handling noise.
 - **Rate limiting + abuse logging:** Redis `INCR`/`EXPIRE` counters; every
   violation is also written to the `abuse_logs` collection for auditing.
 - **Async email:** sending is `@Async` and failures are logged rather than
-  thrown — an email outage never fails a booking or registration. (The Node
+  thrown — an email outage never fails a booking or registration. (The  
   version awaited inline; this is a deliberate improvement.)
 - **Mongo auditing:** `@CreatedDate` / `@LastModifiedDate` populate timestamps
   automatically.
@@ -375,12 +375,12 @@ erDiagram
 
 ---
 
-## 8. Relationship to the Node service
+## 8. Relationship to the   service
 
 This is a behavioural port of `car_hub_backend`. Endpoints, validation rules,
 OTP/booking flows, rate-limit policies, and the response envelope match the
 original. Where Spring offers a cleaner idiom, it is used: typed configuration
 properties over `process.env` lookups, an exception-advice over repeated
 `sendError`, MapStruct over manual mapping, and async email over inline
-`await`. The RabbitMQ / BullMQ queues that were commented out in the Node app
+`await`. The RabbitMQ / BullMQ queues that were commented out in the   app
 are intentionally **not** ported.
