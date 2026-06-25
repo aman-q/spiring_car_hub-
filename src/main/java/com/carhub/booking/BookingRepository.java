@@ -12,6 +12,8 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
 
     Optional<Booking> findByIdAndDeletedFalse(String id);
 
+    boolean existsByCarAndDeletedFalseAndStatusIn(String car, Collection<BookingStatus> statuses);
+
     List<Booking> findByUserAndDeletedFalseOrderByCreatedAtDesc(String user);
 
     List<Booking> findByUserAndStatusAndDeletedFalseOrderByCreatedAtDesc(String user, BookingStatus status);

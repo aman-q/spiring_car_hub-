@@ -23,7 +23,7 @@ import java.util.List;
 
 @Tag(name = "Bookings", description = "Booking lifecycle")
 @RestController
-@RequestMapping("/api/booking")
+@RequestMapping("/api/v1/booking")
 @RequiredArgsConstructor
 public class BookingController {
 

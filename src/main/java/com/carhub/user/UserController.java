@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "User", description = "Registration, authentication and profile")
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
 public class UserController {
 

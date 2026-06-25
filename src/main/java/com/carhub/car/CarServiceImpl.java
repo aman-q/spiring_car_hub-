@@ -79,6 +79,7 @@ public class CarServiceImpl implements CarService {
         }
         List<String> imageUrls = cloudinaryService.uploadImages(images);
         if (imageUrls.size() < MIN_IMAGES) {
+            cloudinaryService.deleteByUrls(imageUrls);
             throw new ApiException(ErrorCode.AT_LEAST_THREE_IMAGES);
         }
 
@@ -93,7 +94,14 @@ public class CarServiceImpl implements CarService {
                 .price(request.getPrice())
                 .build();
 
-        Car saved = carRepository.save(car);
+        Car saved;
+        try {
+            saved = carRepository.save(car);
+        } catch (RuntimeException e) {
+            // Roll back the just-uploaded images so they don't orphan in Cloudinary.
+            cloudinaryService.deleteByUrls(imageUrls);
+            throw e;
+        }
         log.info("Car added: {} by {}", saved.getId(), userId);
         return carMapper.toResponse(saved);
     }
@@ -127,9 +135,11 @@ public class CarServiceImpl implements CarService {
             car.setPrice(request.getPrice());
             changed = true;
         }
+        List<String> supersededImages = null;
         if (images != null && images.length > 0) {
             List<String> imageUrls = cloudinaryService.uploadImages(images);
             if (!imageUrls.isEmpty()) {
+                supersededImages = car.getImages();
                 car.setImages(imageUrls);
                 changed = true;
             }
@@ -140,6 +150,8 @@ public class CarServiceImpl implements CarService {
         }
 
         Car saved = carRepository.save(car);
+        // Only purge the old images once the new set is safely persisted.
+        cloudinaryService.deleteByUrls(supersededImages);
         log.info("Car updated: {}", saved.getId());
         return carMapper.toResponse(saved);
     }
@@ -147,7 +159,11 @@ public class CarServiceImpl implements CarService {
     @Override
     public void removeCar(String userId, String carId) {
         Car car = findOwnedCar(userId, carId);
+        if (bookingRepository.existsByCarAndDeletedFalseAndStatusIn(carId, ACTIVE_STATUSES)) {
+            throw new ApiException(ErrorCode.CAR_HAS_ACTIVE_BOOKINGS);
+        }
         carRepository.delete(car);
+        cloudinaryService.deleteByUrls(car.getImages());
         log.info("Car removed: {}", carId);
     }
 

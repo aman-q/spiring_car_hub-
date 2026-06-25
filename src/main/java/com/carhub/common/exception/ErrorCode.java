@@ -31,6 +31,7 @@ public enum ErrorCode {
     INVALID_ID(HttpStatus.BAD_REQUEST, "error.common.invalid-id"),
     AT_LEAST_THREE_IMAGES(HttpStatus.BAD_REQUEST, "error.car.min-images"),
     CAR_NO_PRICING(HttpStatus.INTERNAL_SERVER_ERROR, "error.car.no-pricing"),
+    CAR_HAS_ACTIVE_BOOKINGS(HttpStatus.CONFLICT, "error.car.has-active-bookings"),
     UNAUTHORIZED_CAR_ACTION(HttpStatus.FORBIDDEN, "error.car.unauthorized-action"),
 
     // ── Bookings ──────────────────────────────────────────────────────────────

@@ -53,6 +53,11 @@ carhub:
   brevo:
     api-key: ${BREVO_API_KEY:}
     base-url: https://api.brevo.com/v3
+  cors:
+    # Comma-separated list; "*" allows all (dev). Set an explicit allow-list in prod.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+  index-init:
+    enabled: ${INDEX_INIT_ENABLED:true}
   rate-limit:
     enabled: true
     global:
@@ -82,4 +87,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  pattern:
+    # Inject the per-request correlation id (set by CorrelationIdFilter) into every line.
+    level: "%5p [%X{traceId:-}]"

@@ -19,6 +19,9 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @RequiredArgsConstructor
 public class EmailService {
 
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long BASE_BACKOFF_MS = 300;
+
     private final EmailProvider emailProvider;
     private final SpringTemplateEngine templateEngine;
 
@@ -52,11 +55,42 @@ public class EmailService {
     }
 
     private void dispatch(String subject, String toEmail, String template, Context context) {
+        String html;
         try {
-            String html = templateEngine.process(template, context);
-            emailProvider.send(subject, toEmail, html);
+            html = templateEngine.process(template, context);
         } catch (Exception e) {
-            log.error("Failed to send '{}' email to {}", subject, toEmail, e);
+            // A template error is deterministic — retrying won't help.
+            log.error("Failed to render '{}' email template for {}", template, toEmail, e);
+            return;
+        }
+        sendWithRetry(subject, toEmail, html);
+    }
+
+    /**
+     * Best-effort send with bounded exponential backoff. Transient provider/network
+     * failures get a few retries; a final failure is logged (the request already
+     * succeeded — email is fire-and-forget).
+     */
+    private void sendWithRetry(String subject, String toEmail, String html) {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                emailProvider.send(subject, toEmail, html);
+                return;
+            } catch (Exception e) {
+                if (attempt == MAX_ATTEMPTS) {
+                    log.error("Failed to send '{}' email to {} after {} attempts", subject, toEmail, MAX_ATTEMPTS, e);
+                    return;
+                }
+                long backoff = BASE_BACKOFF_MS * (1L << (attempt - 1));
+                log.warn("Email send attempt {}/{} to {} failed ({}), retrying in {}ms",
+                        attempt, MAX_ATTEMPTS, toEmail, e.getMessage(), backoff);
+                try {
+                    Thread.sleep(backoff);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
         }
     }
 }

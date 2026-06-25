@@ -52,9 +52,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/register",
+              "raw": "{{baseUrl}}/api/v1/user/register",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "register" ]
+              "path": [ "api", "v1", "user", "register" ]
             },
             "description": "Creates a user and emails a 6-digit OTP (10-min expiry). Rate limited: 5 / 10 min."
           }
@@ -71,9 +71,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/verify-otp",
+              "raw": "{{baseUrl}}/api/v1/user/verify-otp",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "verify-otp" ]
+              "path": [ "api", "v1", "user", "verify-otp" ]
             },
             "description": "Set the `otp` collection variable to the code from the email, then send. Marks the account email-verified."
           }
@@ -90,9 +90,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/resend-otp",
+              "raw": "{{baseUrl}}/api/v1/user/resend-otp",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "resend-otp" ]
+              "path": [ "api", "v1", "user", "resend-otp" ]
             },
             "description": "Re-sends a fresh OTP. Rate limited: 3 / 5 min."
           }
@@ -127,9 +127,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/login",
+              "raw": "{{baseUrl}}/api/v1/user/login",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "login" ]
+              "path": [ "api", "v1", "user", "login" ]
             },
             "description": "Returns a 15-min access token + a 7-day rotating refresh token. The test script saves both. Rate limited: 5 / 5 min."
           }
@@ -163,9 +163,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/refresh-token",
+              "raw": "{{baseUrl}}/api/v1/user/refresh-token",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "refresh-token" ]
+              "path": [ "api", "v1", "user", "refresh-token" ]
             },
             "description": "Exchange a valid refresh token for a NEW access token + a NEW refresh token (both rotated). Use this when the access token has expired (401)."
           }
@@ -194,9 +194,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/logout",
+              "raw": "{{baseUrl}}/api/v1/user/logout",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "logout" ]
+              "path": [ "api", "v1", "user", "logout" ]
             },
             "description": "Blacklists the current access token (by jti, in Redis) and clears the stored refresh token. Sends Bearer {{accessToken}}."
           }
@@ -213,9 +213,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/forgot-password",
+              "raw": "{{baseUrl}}/api/v1/user/forgot-password",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "forgot-password" ]
+              "path": [ "api", "v1", "user", "forgot-password" ]
             },
             "description": "Emails a password-reset OTP. Rate limited: 3 / 5 min."
           }
@@ -232,9 +232,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/reset-password",
+              "raw": "{{baseUrl}}/api/v1/user/reset-password",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "reset-password" ]
+              "path": [ "api", "v1", "user", "reset-password" ]
             },
             "description": "Resets the password using the OTP and revokes the existing refresh token."
           }
@@ -245,9 +245,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/user/profile/me",
+              "raw": "{{baseUrl}}/api/v1/user/profile/me",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "profile", "me" ]
+              "path": [ "api", "v1", "user", "profile", "me" ]
             },
             "description": "Current user's profile. Requires Bearer token."
           }
@@ -263,9 +263,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/profile/me",
+              "raw": "{{baseUrl}}/api/v1/user/profile/me",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "profile", "me" ]
+              "path": [ "api", "v1", "user", "profile", "me" ]
             },
             "description": "All fields optional; at least one required."
           }
@@ -276,9 +276,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/user/profile/me/bookings",
+              "raw": "{{baseUrl}}/api/v1/user/profile/me/bookings",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "user", "profile", "me", "bookings" ]
+              "path": [ "api", "v1", "user", "profile", "me", "bookings" ]
             },
             "description": "Upcoming + past bookings for the current user."
           }
@@ -295,9 +295,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cars?page=1&limit=10",
+              "raw": "{{baseUrl}}/api/v1/cars?page=1&limit=10",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "cars" ],
+              "path": [ "api", "v1", "cars" ],
               "query": [
                 { "key": "page", "value": "1" },
                 { "key": "limit", "value": "10" },
@@ -315,9 +315,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cars/{{carId}}",
+              "raw": "{{baseUrl}}/api/v1/cars/{{carId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "cars", "{{carId}}" ]
+              "path": [ "api", "v1", "cars", "{{carId}}" ]
             },
             "description": "Public. Includes availability info."
           }
@@ -355,9 +355,9 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/cars",
+              "raw": "{{baseUrl}}/api/v1/cars",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "cars" ]
+              "path": [ "api", "v1", "cars" ]
             },
             "description": "Multipart. Attach 3–10 image files to the `images` rows. driveType = LWD | RWD. Requires Bearer token. Do NOT set Content-Type manually — Postman adds the multipart boundary."
           }
@@ -376,9 +376,9 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/cars/{{carId}}",
+              "raw": "{{baseUrl}}/api/v1/cars/{{carId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "cars", "{{carId}}" ]
+              "path": [ "api", "v1", "cars", "{{carId}}" ]
             },
             "description": "Owner only. All fields optional; images optional."
           }
@@ -389,9 +389,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cars/{{carId}}",
+              "raw": "{{baseUrl}}/api/v1/cars/{{carId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "cars", "{{carId}}" ]
+              "path": [ "api", "v1", "cars", "{{carId}}" ]
             },
             "description": "Owner only."
           }
@@ -402,9 +402,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cars/usercars",
+              "raw": "{{baseUrl}}/api/v1/cars/usercars",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "cars", "usercars" ]
+              "path": [ "api", "v1", "cars", "usercars" ]
             },
             "description": "Cars added by the current user."
           }
@@ -438,9 +438,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/booking/new-booking",
+              "raw": "{{baseUrl}}/api/v1/booking/new-booking",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "booking", "new-booking" ]
+              "path": [ "api", "v1", "booking", "new-booking" ]
             },
             "description": "Date-overlap protected (Redis lock). extras: gps (+10/day), babySeat (+5/day)."
           }
@@ -451,9 +451,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/booking/my-bookings?status=PENDING",
+              "raw": "{{baseUrl}}/api/v1/booking/my-bookings?status=PENDING",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "booking", "my-bookings" ],
+              "path": [ "api", "v1", "booking", "my-bookings" ],
               "query": [
                 { "key": "status", "value": "PENDING", "description": "Optional: PENDING | CONFIRMED | CANCELLED | COMPLETED" }
               ]
@@ -467,9 +467,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/booking/{{bookingId}}",
+              "raw": "{{baseUrl}}/api/v1/booking/{{bookingId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "booking", "{{bookingId}}" ]
+              "path": [ "api", "v1", "booking", "{{bookingId}}" ]
             }
           }
         },
@@ -479,9 +479,9 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/booking/{{bookingId}}/confirm",
+              "raw": "{{baseUrl}}/api/v1/booking/{{bookingId}}/confirm",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "booking", "{{bookingId}}", "confirm" ]
+              "path": [ "api", "v1", "booking", "{{bookingId}}", "confirm" ]
             }
           }
         },
@@ -491,9 +491,9 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/booking/{{bookingId}}/cancel",
+              "raw": "{{baseUrl}}/api/v1/booking/{{bookingId}}/cancel",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "booking", "{{bookingId}}", "cancel" ]
+              "path": [ "api", "v1", "booking", "{{bookingId}}", "cancel" ]
             }
           }
         },
@@ -503,9 +503,9 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/booking/{{bookingId}}/complete",
+              "raw": "{{baseUrl}}/api/v1/booking/{{bookingId}}/complete",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "booking", "{{bookingId}}", "complete" ]
+              "path": [ "api", "v1", "booking", "{{bookingId}}", "complete" ]
             }
           }
         }

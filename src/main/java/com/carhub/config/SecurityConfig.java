@@ -3,6 +3,7 @@ package com.carhub.config;
 import com.carhub.common.security.JwtAuthenticationFilter;
 import com.carhub.common.security.RestAccessDeniedHandler;
 import com.carhub.common.security.RestAuthenticationEntryPoint;
+import com.carhub.config.properties.CorsProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,13 +33,13 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_POST = {
-            "/api/user/login",
-            "/api/user/register",
-            "/api/user/verify-otp",
-            "/api/user/resend-otp",
-            "/api/user/refresh-token",
-            "/api/user/forgot-password",
-            "/api/user/reset-password"
+            "/api/v1/user/login",
+            "/api/v1/user/register",
+            "/api/v1/user/verify-otp",
+            "/api/v1/user/resend-otp",
+            "/api/v1/user/refresh-token",
+            "/api/v1/user/forgot-password",
+            "/api/v1/user/reset-password"
     };
 
     private static final String[] PUBLIC_MISC = {
@@ -46,6 +47,8 @@ public class SecurityConfig {
             "/error",
             "/actuator/health",
             "/actuator/info",
+            // Prometheus scrape target — reach it via network policy/management port in prod.
+            "/actuator/prometheus",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
@@ -54,6 +57,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final CorsProperties corsProperties;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -64,7 +68,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_MISC).permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/cars").permitAll()
+                        // usercars is the caller's own listing — must stay authenticated and
+                        // be matched before the public car patterns below.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/cars/usercars").authenticated()
+                        // Public catalogue: list + single car detail.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/cars", "/api/v1/cars/*").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
@@ -82,11 +90,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+        config.setAllowedOrigins(corsProperties.allowedOrigins());
+        config.setAllowedMethods(corsProperties.allowedMethods());
+        config.setAllowedHeaders(corsProperties.allowedHeaders());
         config.setExposedHeaders(List.of(
-                "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset", "Retry-After"));
+                "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset", "Retry-After", "X-Request-Id"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

@@ -38,6 +38,44 @@ public class CloudinaryService {
         return urls;
     }
 
+    /**
+     * Best-effort deletion of previously-uploaded assets by their secure URL. Used to
+     * avoid orphaning images when a car's images are replaced, or to roll back uploads
+     * when the owning car fails to persist. Never throws — cleanup must not break the flow.
+     */
+    public void deleteByUrls(List<String> urls) {
+        if (urls == null) {
+            return;
+        }
+        for (String url : urls) {
+            String publicId = publicIdFromUrl(url);
+            if (publicId == null) {
+                continue;
+            }
+            try {
+                cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "image"));
+                log.debug("Deleted Cloudinary asset {}", publicId);
+            } catch (Exception e) {
+                log.warn("Failed to delete Cloudinary asset {}: {}", publicId, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Extracts the Cloudinary {@code public_id} from a delivery URL, e.g.
+     * {@code .../upload/v123/collection/images/name.jpg} -> {@code collection/images/name}.
+     */
+    String publicIdFromUrl(String url) {
+        if (url == null || !url.contains("/upload/")) {
+            return null;
+        }
+        String afterUpload = url.substring(url.indexOf("/upload/") + "/upload/".length());
+        // Drop a leading version segment ("v1234567890/").
+        afterUpload = afterUpload.replaceFirst("^v\\d+/", "");
+        int dot = afterUpload.lastIndexOf('.');
+        return dot > 0 ? afterUpload.substring(0, dot) : afterUpload;
+    }
+
     private String uploadOne(MultipartFile file) {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(

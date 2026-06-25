@@ -16,7 +16,9 @@ import com.carhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -43,6 +45,10 @@ public class BookingServiceImpl implements BookingService {
     private static final Duration BOOKING_LOCK_TTL = Duration.ofSeconds(10);
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
+    /** Atomic compare-and-delete: only releases the lock if we still own it. */
+    private static final RedisScript<Long> UNLOCK_SCRIPT = RedisScript.of(
+            "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+            Long.class);
 
     private final BookingRepository bookingRepository;
     private final CarRepository carRepository;
@@ -293,8 +299,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void releaseLock(String lockKey, String lockValue) {
-        if (lockValue.equals(redis.opsForValue().get(lockKey))) {
-            redis.delete(lockKey);
+        try {
+            redis.execute(UNLOCK_SCRIPT, List.of(lockKey), lockValue);
+        } catch (DataAccessException e) {
+            // The lock's TTL guarantees it is released even if this best-effort delete fails.
+            log.warn("Failed to release booking lock {}: {}", lockKey, e.getMessage());
         }
     }
 }

@@ -30,7 +30,7 @@ import java.util.List;
 
 @Tag(name = "Cars", description = "Car listings and availability")
 @RestController
-@RequestMapping("/api/cars")
+@RequestMapping("/api/v1/cars")
 @RequiredArgsConstructor
 public class CarController {
 

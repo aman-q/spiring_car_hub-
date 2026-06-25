@@ -64,10 +64,29 @@ set -a; source .env; set +a
 | `EMAIL_SENDER_NAME` / `EMAIL_SENDER_ADDRESS` | From-identity on emails |
 | `BREVO_API_KEY` | Brevo API key (when provider = `brevo`) |
 | `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_USER` / `EMAIL_PASSWORD` | SMTP creds (when provider = `smtp`) |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allow-list (default `*`; set explicitly in prod) |
+| `INDEX_INIT_ENABLED` | Toggle the startup index migration (default `true`) |
+
+> **Production note:** running under the `prod` (or `staging`) Spring profile, the
+> app **fails to start** if `JWT_SECRET` is still the dev default or shorter than
+> 32 bytes (`JwtSecretValidator`).
 
 ---
 
 ## Running
+
+### With Docker (recommended for local)
+
+```bash
+# Builds the image and starts app + MongoDB + Redis together.
+docker compose up --build
+```
+
+The app waits for Mongo/Redis health checks, then serves on
+`http://localhost:5001`. Override secrets via your shell env or a `.env` file
+read by Compose.
+
+### With Maven
 
 ```bash
 # Dev server (hot restart via spring-boot-devtools is not enabled; use your IDE
@@ -92,7 +111,13 @@ Swagger UI is served at:
 - Swagger UI: `http://localhost:5001/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:5001/v3/api-docs`
 
-Health check: `http://localhost:5001/actuator/health`
+### Observability
+
+- Health: `http://localhost:5001/actuator/health`
+- Metrics (Micrometer): `http://localhost:5001/actuator/metrics`
+- Prometheus scrape: `http://localhost:5001/actuator/prometheus`
+- Every request carries a correlation id: send/receive `X-Request-Id`, and it
+  appears in each log line as `traceId` (via `CorrelationIdFilter` + MDC).
 
 ### Postman
 
@@ -110,43 +135,43 @@ the 15-min token expires, run **Refresh Token** to rotate it. `carId` /
 All responses use the envelope `{ "success": boolean, "message": string,
 "data": <T|null> }`. Protected routes require `Authorization: Bearer <accessToken>`.
 
-### `POST /api/user` — auth & profile
+### `POST /api/v1/user` — auth & profile
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/api/user/register` | public | Create account, email a 6-digit OTP |
-| POST | `/api/user/verify-otp` | public | Verify OTP, mark email verified |
-| POST | `/api/user/resend-otp` | public | Re-send OTP |
-| POST | `/api/user/login` | public | Returns access + refresh tokens |
-| POST | `/api/user/refresh-token` | public | Rotate refresh token, new access token |
-| POST | `/api/user/forgot-password` | public | Email a reset OTP |
-| POST | `/api/user/reset-password` | public | Reset password with OTP |
-| POST | `/api/user/logout` | bearer | Blacklist access token, revoke refresh |
-| GET | `/api/user/profile/me` | bearer | Current user profile |
-| PATCH | `/api/user/profile/me` | bearer | Update profile |
-| GET | `/api/user/profile/me/bookings` | bearer | Upcoming + past bookings |
+| POST | `/api/v1/user/register` | public | Create account, email a 6-digit OTP |
+| POST | `/api/v1/user/verify-otp` | public | Verify OTP, mark email verified |
+| POST | `/api/v1/user/resend-otp` | public | Re-send OTP |
+| POST | `/api/v1/user/login` | public | Returns access + refresh tokens |
+| POST | `/api/v1/user/refresh-token` | public | Rotate refresh token, new access token |
+| POST | `/api/v1/user/forgot-password` | public | Email a reset OTP |
+| POST | `/api/v1/user/reset-password` | public | Reset password with OTP |
+| POST | `/api/v1/user/logout` | bearer | Blacklist access token, revoke refresh |
+| GET | `/api/v1/user/profile/me` | bearer | Current user profile |
+| PATCH | `/api/v1/user/profile/me` | bearer | Update profile |
+| GET | `/api/v1/user/profile/me/bookings` | bearer | Upcoming + past bookings |
 
-### `/api/cars` — listings
-
-| Method | Path | Auth | Purpose |
-|---|---|---|---|
-| GET | `/api/cars` | public | Paged listings; optional `startDate`/`endDate` availability filter |
-| GET | `/api/cars/{id}` | public | Car detail + availability |
-| POST | `/api/cars` | bearer | Add car (multipart, 3–10 images) |
-| PUT | `/api/cars/{id}` | bearer | Update car (owner only) |
-| DELETE | `/api/cars/{id}` | bearer | Remove car (owner only) |
-| GET | `/api/cars/usercars` | bearer | Caller's own cars |
-
-### `/api/booking` — bookings
+### `/api/v1/cars` — listings
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/api/booking/new-booking` | bearer | Create booking (date-overlap protected) |
-| GET | `/api/booking/my-bookings` | bearer | Caller's bookings (optional `status` filter) |
-| GET | `/api/booking/{id}` | bearer | Booking detail |
-| PATCH | `/api/booking/{id}/confirm` | bearer | Confirm booking |
-| PATCH | `/api/booking/{id}/cancel` | bearer | Cancel booking |
-| PATCH | `/api/booking/{id}/complete` | bearer | Complete booking |
+| GET | `/api/v1/cars` | public | Paged listings; optional `startDate`/`endDate` availability filter |
+| GET | `/api/v1/cars/{id}` | public | Car detail + availability |
+| POST | `/api/v1/cars` | bearer | Add car (multipart, 3–10 images) |
+| PUT | `/api/v1/cars/{id}` | bearer | Update car (owner only) |
+| DELETE | `/api/v1/cars/{id}` | bearer | Remove car (owner only) |
+| GET | `/api/v1/cars/usercars` | bearer | Caller's own cars |
+
+### `/api/v1/booking` — bookings
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/v1/booking/new-booking` | bearer | Create booking (date-overlap protected) |
+| GET | `/api/v1/booking/my-bookings` | bearer | Caller's bookings (optional `status` filter) |
+| GET | `/api/v1/booking/{id}` | bearer | Booking detail |
+| PATCH | `/api/v1/booking/{id}/confirm` | bearer | Confirm booking |
+| PATCH | `/api/v1/booking/{id}/cancel` | bearer | Cancel booking |
+| PATCH | `/api/v1/booking/{id}/complete` | bearer | Complete booking |
 
 ### Rate limits
 

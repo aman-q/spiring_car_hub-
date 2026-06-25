@@ -129,7 +129,7 @@ exceptions become responses, so no controller carries error-handling noise.
   rotated on every refresh).
 - **Logout** blacklists the access token's `jti` in Redis (`bl:{jti}`) for its
   remaining TTL and revokes the refresh token.
-- `SecurityConfig` is stateless: public auth routes + public `GET /api/cars` +
+- `SecurityConfig` is stateless: public auth routes + public `GET /api/v1/cars` +
   docs/health; everything else requires a valid bearer token.
   `@AuthenticationPrincipal String userId` exposes the caller's id to controllers.
 - Passwords hashed with BCrypt. Login returns a single `INVALID_CREDENTIALS`
@@ -197,7 +197,7 @@ sequenceDiagram
     participant ES as EmailService
     participant DB as MongoDB
 
-    C->>UC: POST /api/user/register
+    C->>UC: POST /api/v1/user/register
     Note over UC: @RateLimit(register)
     UC->>AS: register(request)
     AS->>UR: findByEmail / findByPhonenumber
@@ -214,7 +214,7 @@ sequenceDiagram
         UC-->>C: 201 ApiResponse(USER_REGISTERED)
     end
 
-    C->>UC: POST /api/user/verify-otp
+    C->>UC: POST /api/v1/user/verify-otp
     UC->>AS: verifyOtp(request)
     AS->>UR: findByEmail
     alt otp matches and not expired
@@ -238,7 +238,7 @@ sequenceDiagram
     participant UR as UserRepository
     participant JS as JwtService
 
-    C->>UC: POST /api/user/login
+    C->>UC: POST /api/v1/user/login
     Note over UC: @RateLimit(login)
     UC->>AS: login(request)
     AS->>UR: findByEmail
@@ -296,7 +296,7 @@ sequenceDiagram
     participant BR as BookingRepository
     participant ES as EmailService
 
-    C->>BC: POST /api/booking/new-booking
+    C->>BC: POST /api/v1/booking/new-booking
     BC->>BS: createBooking(userId, request)
     BS->>CR: findById(carId)
     BS->>R: SET lock:booking:{carId} NX EX 10s

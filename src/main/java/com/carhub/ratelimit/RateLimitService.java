@@ -8,6 +8,8 @@ import com.carhub.config.properties.RateLimitProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,12 @@ import java.util.concurrent.TimeUnit;
  * Core fixed-window limiter over Redis (INCR + EXPIRE + TTL), mirroring the Node
  * {@code rateLimiter.js}. Sets {@code X-RateLimit-*} headers, persists an
  * {@link AbuseLog} on violation, and throws {@link ErrorCode#RATE_LIMIT_EXCEEDED}.
+ *
+ * <p><b>Fail-open:</b> if Redis is unreachable the limiter logs and allows the request
+ * rather than 500-ing the whole API — availability is preferred over strict limiting
+ * during an infrastructure outage.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RateLimitService {
@@ -31,16 +38,22 @@ public class RateLimitService {
         String clientIp = clientIp(request);
         String key = policy.keyPrefix() + clientIp;
 
-        Long current = redis.opsForValue().increment(key);
-        if (current == null) {
-            current = 1L;
+        long current;
+        long retryAfter;
+        try {
+            Long incremented = redis.opsForValue().increment(key);
+            current = (incremented == null) ? 1L : incremented;
+            if (current == 1L) {
+                redis.expire(key, Duration.ofSeconds(policy.windowSeconds()));
+            }
+            Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
+            retryAfter = (ttl == null || ttl < 0) ? policy.windowSeconds() : ttl;
+        } catch (DataAccessException e) {
+            // Redis down — fail open so a cache outage doesn't take down the API.
+            log.warn("Rate limiter unavailable, allowing request [{} {}]: {}",
+                    request.getMethod(), request.getRequestURI(), e.getMessage());
+            return;
         }
-        if (current == 1L) {
-            redis.expire(key, Duration.ofSeconds(policy.windowSeconds()));
-        }
-
-        Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
-        long retryAfter = (ttl == null || ttl < 0) ? policy.windowSeconds() : ttl;
 
         response.setHeader("X-RateLimit-Limit", String.valueOf(policy.limit()));
         response.setHeader("X-RateLimit-Remaining", String.valueOf(Math.max(policy.limit() - current, 0)));
@@ -48,6 +61,14 @@ public class RateLimitService {
 
         if (current > policy.limit()) {
             response.setHeader("Retry-After", String.valueOf(retryAfter));
+            persistAbuseLog(clientIp, request, current, policy);
+            throw new ApiException(ErrorCode.RATE_LIMIT_EXCEEDED, retryAfter);
+        }
+    }
+
+    private void persistAbuseLog(String clientIp, HttpServletRequest request, long current,
+                                 RateLimitProperties.Policy policy) {
+        try {
             abuseLogRepository.save(AbuseLog.builder()
                     .ipAddress(clientIp)
                     .route(request.getRequestURI())
@@ -57,7 +78,9 @@ public class RateLimitService {
                     .windowSec(policy.windowSeconds())
                     .createdAt(Instant.now())
                     .build());
-            throw new ApiException(ErrorCode.RATE_LIMIT_EXCEEDED, retryAfter);
+        } catch (DataAccessException e) {
+            // Auditing the violation must never mask the 429 we're about to return.
+            log.warn("Failed to persist abuse log for {}: {}", clientIp, e.getMessage());
         }
     }
 
