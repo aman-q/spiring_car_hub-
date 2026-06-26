@@ -93,7 +93,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        # Only health (Railway probe) and info are public. metrics/prometheus leak
+        # internal operational detail (JVM memory, request timings, DB pool) and are
+        # NOT exposed on the public port; Micrometer still collects them internally.
+        # Re-enable behind a private management port / network policy for real scraping.
+        include: health,info
   endpoint:
     health:
       show-details: when-authorized

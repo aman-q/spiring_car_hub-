@@ -47,8 +47,6 @@ public class SecurityConfig {
             "/error",
             "/actuator/health",
             "/actuator/info",
-            // Prometheus scrape target — reach it via network policy/management port in prod.
-            "/actuator/prometheus",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
