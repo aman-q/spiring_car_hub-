@@ -10,6 +10,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,6 +54,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         String message = messages.get(ErrorCode.ACCESS_DENIED.getMessageKey());
         return ResponseEntity.status(ErrorCode.ACCESS_DENIED.getStatus()).body(ApiResponse.error(message));
+    }
+
+    /**
+     * Unmapped paths (a stray {@code GET /}, {@code /favicon.ico}, a typo'd URL) reach the
+     * static-resource handler and throw this. Treat it as a plain 404 — not a 500 with a
+     * stack trace — so hitting the bare domain doesn't look like the service is broken.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResource(NoResourceFoundException ex) {
+        log.warn("No resource for path: {}", ex.getResourcePath());
+        String message = messages.get(ErrorCode.ROUTE_NOT_FOUND.getMessageKey());
+        return ResponseEntity.status(ErrorCode.ROUTE_NOT_FOUND.getStatus()).body(ApiResponse.error(message));
     }
 
     @ExceptionHandler(Exception.class)

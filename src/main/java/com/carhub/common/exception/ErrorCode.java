@@ -50,6 +50,7 @@ public enum ErrorCode {
 
     // ── General / cross-cutting ───────────────────────────────────────────────
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "error.common.validation"),
+    ROUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "error.common.route-not-found"),
     RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "error.common.rate-limit"),
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "error.common.unauthenticated"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "error.common.access-denied"),
