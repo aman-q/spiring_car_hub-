@@ -91,6 +91,13 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  health:
+    # The mail indicator opens an SMTP connection on every health check. Email is sent
+    # via Brevo's HTTP API (not SMTP), so this check only adds latency and can wrongly
+    # flip /actuator/health to DOWN (503) — which would fail the platform health check
+    # and the deploy. Mongo/Redis indicators stay enabled.
+    mail:
+      enabled: false
   metrics:
     tags:
       application: ${spring.application.name}
