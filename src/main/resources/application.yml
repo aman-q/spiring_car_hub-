@@ -34,6 +34,12 @@ spring:
 
 server:
   port: ${PORT:5001}
+  # Behind Railway's TLS-terminating proxy the app receives plain HTTP. Honour the
+  # X-Forwarded-Proto/Host/Port headers the proxy sets so generated absolute URLs
+  # (springdoc "servers", the OAuth2 redirect, Location headers) use https and the
+  # public host — otherwise Swagger UI issues http:// requests that the browser
+  # blocks as mixed content on the https page.
+  forward-headers-strategy: framework
 
 carhub:
   jwt:
